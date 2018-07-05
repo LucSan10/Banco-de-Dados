@@ -212,7 +212,7 @@ go
 
 CREATE TABLE [Pessoa_Física]
 ( 
-	[Cd_CPF]             integer  NULL ,
+	[Cd_CPF]             char(11)  NULL ,
 	[Nm_Cliente]         varchar(40)  NULL ,
 	[Cd_Cliente]         integer  NULL ,
 	[Cd_PF]              integer  NOT NULL 
@@ -225,7 +225,7 @@ go
 
 CREATE TABLE [Pessoa_Jurídica]
 ( 
-	[Cd_CPNJ]            integer  NULL ,
+	[Cd_CPNJ]            char(14)  NULL ,
 	[Nm_Razão_Social]    varchar(25)  NULL ,
 	[Cd_Inscrição_Estadual] integer  NULL ,
 	[Cd_Cliente]         integer  NULL ,
