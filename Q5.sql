@@ -87,28 +87,6 @@ CREATE TABLE [Agenda]
 go
 
 ALTER TABLE [Agenda]
-	ADD CONSTRAINT [XPKTelefone_Cliente] PRIMARY KEY  CLUSTERED ([Cd_Telefone] ASC,[Cd_Cliente] ASC)
-go
-
-CREATE TABLE [Agenda]
-( 
-	[Cd_Telefone]        integer  NOT NULL ,
-	[Cd_Cliente]         integer  NOT NULL 
-)
-go
-
-ALTER TABLE [Agenda]
-	ADD CONSTRAINT [XPKTelefone_Cliente] PRIMARY KEY  CLUSTERED ([Cd_Telefone] ASC,[Cd_Cliente] ASC)
-go
-
-CREATE TABLE [Agenda]
-( 
-	[Cd_Telefone]        integer  NOT NULL ,
-	[Cd_Cliente]         integer  NOT NULL 
-)
-go
-
-ALTER TABLE [Agenda]
 	ADD CONSTRAINT [XPKAgenda] PRIMARY KEY  CLUSTERED ([Cd_Telefone] ASC,[Cd_Cliente] ASC)
 go
 
@@ -181,7 +159,7 @@ go
 CREATE TABLE [Endereço]
 ( 
 	[Cd_Endereço]        integer  NOT NULL ,
-	[Nm_Complemento]     varchar(20)  NULL ,
+	[Nm_Complemento]     varchar(30)  NULL ,
 	[Nu_Número]          integer  NULL ,
 	[Nm_Endereço]        varchar(50)  NULL ,
 	[Cd_Municipio]       integer  NULL ,
@@ -234,8 +212,8 @@ go
 
 CREATE TABLE [Pessoa_Física]
 ( 
-	[Cd_CPF]             char(11)  NULL ,
-	[Nm_Cliente]         varchar(30)  NULL ,
+	[Cd_CPF]             integer  NULL ,
+	[Nm_Cliente]         varchar(40)  NULL ,
 	[Cd_Cliente]         integer  NULL ,
 	[Cd_PF]              integer  NOT NULL 
 )
@@ -248,7 +226,7 @@ go
 CREATE TABLE [Pessoa_Jurídica]
 ( 
 	[Cd_CPNJ]            integer  NULL ,
-	[Nm_Razão_Social]    varchar(40)  NULL ,
+	[Nm_Razão_Social]    varchar(25)  NULL ,
 	[Cd_Inscrição_Estadual] integer  NULL ,
 	[Cd_Cliente]         integer  NULL ,
 	[Cd_CFOP]            integer  NULL ,
@@ -265,9 +243,9 @@ go
 CREATE TABLE [Produto]
 ( 
 	[Cd_Produto]         integer  NOT NULL ,
-	[Ds_Produto]         varchar(50)  NULL ,
+	[Ds_Produto]         varchar(40)  NULL ,
 	[Vl_Unitário]        float  NULL ,
-	[Ds_Marca]           varchar(20)  NULL ,
+	[Ds_Marca]           varchar(30)  NULL ,
 	[Ps_Peso]            float  NULL ,
 	[In_ICMS]            float  NULL ,
 	[In_IPI]             float  NULL ,
@@ -295,7 +273,7 @@ go
 CREATE TABLE [Telefone]
 ( 
 	[Nu_Telefone]        varchar(9)  NULL ,
-	[Cd_DDD]             char(2)  NULL ,
+	[Cd_DDD]             varchar(2)  NULL ,
 	[Cd_Telefone]        integer  NOT NULL 
 )
 go
@@ -320,7 +298,7 @@ go
 CREATE TABLE [UF]
 ( 
 	[Cd_UF]              integer  NOT NULL ,
-	[Nm_Estado]          varchar(20)  NULL ,
+	[Nm_Estado]          varchar(25)  NULL ,
 	[Sg_UF]              varchar(2)  NULL 
 )
 go
@@ -332,7 +310,7 @@ go
 CREATE TABLE [Veiculo]
 ( 
 	[Cd_Veiculo]         integer  NOT NULL ,
-	[Cd_Placa]           char(7)  NULL ,
+	[Cd_Placa]           varchar(7)  NULL ,
 	[Cd_Transporte]      integer  NULL ,
 	[Cd_Municipio]       integer  NOT NULL ,
 	[Cd_UF]              integer  NOT NULL 
@@ -341,19 +319,6 @@ go
 
 ALTER TABLE [Veiculo]
 	ADD CONSTRAINT [XPKVeiculo] PRIMARY KEY  CLUSTERED ([Cd_Veiculo] ASC)
-go
-
-
-ALTER TABLE [Agenda]
-	ADD CONSTRAINT [R_128] FOREIGN KEY ([Cd_Telefone]) REFERENCES [Telefone]([Cd_Telefone])
-		ON DELETE NO ACTION
-		ON UPDATE NO ACTION
-go
-
-ALTER TABLE [Agenda]
-	ADD CONSTRAINT [R_129] FOREIGN KEY ([Cd_Cliente]) REFERENCES [Cliente]([Cd_Cliente])
-		ON DELETE NO ACTION
-		ON UPDATE NO ACTION
 go
 
 
@@ -531,155 +496,6 @@ ALTER TABLE [Veiculo]
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
 go
-
-
-CREATE TRIGGER tD_Agenda ON Agenda FOR DELETE AS
-/* ERwin Builtin Trigger */
-/* DELETE trigger on Agenda */
-BEGIN
-  DECLARE  @errno   int,
-           @severity int,
-           @state    int,
-           @errmsg  varchar(255)
-    /* ERwin Builtin Trigger */
-    /* Cliente  Agenda on child delete no action */
-    /* ERWIN_RELATION:CHECKSUM="00027790", PARENT_OWNER="", PARENT_TABLE="Cliente"
-    CHILD_OWNER="", CHILD_TABLE="Agenda"
-    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
-    FK_CONSTRAINT="R_129", FK_COLUMNS="Cd_Cliente" */
-    IF EXISTS (SELECT * FROM deleted,Cliente
-      WHERE
-        /* %JoinFKPK(deleted,Cliente," = "," AND") */
-        deleted.Cd_Cliente = Cliente.Cd_Cliente AND
-        NOT EXISTS (
-          SELECT * FROM Agenda
-          WHERE
-            /* %JoinFKPK(Agenda,Cliente," = "," AND") */
-            Agenda.Cd_Cliente = Cliente.Cd_Cliente
-        )
-    )
-    BEGIN
-      SELECT @errno  = 30010,
-             @errmsg = 'Cannot delete last Agenda because Cliente exists.'
-      GOTO error
-    END
-
-    /* ERwin Builtin Trigger */
-    /* Telefone  Agenda on child delete no action */
-    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="Telefone"
-    CHILD_OWNER="", CHILD_TABLE="Agenda"
-    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
-    FK_CONSTRAINT="R_128", FK_COLUMNS="Cd_Telefone" */
-    IF EXISTS (SELECT * FROM deleted,Telefone
-      WHERE
-        /* %JoinFKPK(deleted,Telefone," = "," AND") */
-        deleted.Cd_Telefone = Telefone.Cd_Telefone AND
-        NOT EXISTS (
-          SELECT * FROM Agenda
-          WHERE
-            /* %JoinFKPK(Agenda,Telefone," = "," AND") */
-            Agenda.Cd_Telefone = Telefone.Cd_Telefone
-        )
-    )
-    BEGIN
-      SELECT @errno  = 30010,
-             @errmsg = 'Cannot delete last Agenda because Telefone exists.'
-      GOTO error
-    END
-
-
-    /* ERwin Builtin Trigger */
-    RETURN
-error:
-   RAISERROR (@errmsg, -- Message text.
-              @severity, -- Severity (0~25).
-              @state) -- State (0~255).
-    rollback transaction
-END
-
-go
-
-
-CREATE TRIGGER tU_Agenda ON Agenda FOR UPDATE AS
-/* ERwin Builtin Trigger */
-/* UPDATE trigger on Agenda */
-BEGIN
-  DECLARE  @numrows int,
-           @nullcnt int,
-           @validcnt int,
-           @insCd_Telefone integer, 
-           @insCd_Cliente integer,
-           @errno   int,
-           @severity int,
-           @state    int,
-           @errmsg  varchar(255)
-
-  SELECT @numrows = @@rowcount
-  /* ERwin Builtin Trigger */
-  /* Cliente  Agenda on child update no action */
-  /* ERWIN_RELATION:CHECKSUM="0002b7de", PARENT_OWNER="", PARENT_TABLE="Cliente"
-    CHILD_OWNER="", CHILD_TABLE="Agenda"
-    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
-    FK_CONSTRAINT="R_129", FK_COLUMNS="Cd_Cliente" */
-  IF
-    /* %ChildFK(" OR",UPDATE) */
-    UPDATE(Cd_Cliente)
-  BEGIN
-    SELECT @nullcnt = 0
-    SELECT @validcnt = count(*)
-      FROM inserted,Cliente
-        WHERE
-          /* %JoinFKPK(inserted,Cliente) */
-          inserted.Cd_Cliente = Cliente.Cd_Cliente
-    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
-    
-    IF @validcnt + @nullcnt != @numrows
-    BEGIN
-      SELECT @errno  = 30007,
-             @errmsg = 'Cannot update Agenda because Cliente does not exist.'
-      GOTO error
-    END
-  END
-
-  /* ERwin Builtin Trigger */
-  /* Telefone  Agenda on child update no action */
-  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="Telefone"
-    CHILD_OWNER="", CHILD_TABLE="Agenda"
-    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
-    FK_CONSTRAINT="R_128", FK_COLUMNS="Cd_Telefone" */
-  IF
-    /* %ChildFK(" OR",UPDATE) */
-    UPDATE(Cd_Telefone)
-  BEGIN
-    SELECT @nullcnt = 0
-    SELECT @validcnt = count(*)
-      FROM inserted,Telefone
-        WHERE
-          /* %JoinFKPK(inserted,Telefone) */
-          inserted.Cd_Telefone = Telefone.Cd_Telefone
-    /* %NotnullFK(inserted," IS NULL","select @nullcnt = count(*) from inserted where"," AND") */
-    
-    IF @validcnt + @nullcnt != @numrows
-    BEGIN
-      SELECT @errno  = 30007,
-             @errmsg = 'Cannot update Agenda because Telefone does not exist.'
-      GOTO error
-    END
-  END
-
-
-  /* ERwin Builtin Trigger */
-  RETURN
-error:
-   RAISERROR (@errmsg, -- Message text.
-              @severity, -- Severity (0~25).
-              @state) -- State (0~255).
-    rollback transaction
-END
-
-go
-
-
 
 
 CREATE TRIGGER tD_Agenda ON Agenda FOR DELETE AS
@@ -1309,28 +1125,10 @@ BEGIN
            @errmsg  varchar(255)
     /* ERwin Builtin Trigger */
     /* Cliente  Agenda on parent delete no action */
-    /* ERWIN_RELATION:CHECKSUM="0005c4e6", PARENT_OWNER="", PARENT_TABLE="Cliente"
+    /* ERWIN_RELATION:CHECKSUM="0004c56e", PARENT_OWNER="", PARENT_TABLE="Cliente"
     CHILD_OWNER="", CHILD_TABLE="Agenda"
     P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
     FK_CONSTRAINT="R_131", FK_COLUMNS="Cd_Cliente" */
-    IF EXISTS (
-      SELECT * FROM deleted,Agenda
-      WHERE
-        /*  %JoinFKPK(Agenda,deleted," = "," AND") */
-        Agenda.Cd_Cliente = deleted.Cd_Cliente
-    )
-    BEGIN
-      SELECT @errno  = 30001,
-             @errmsg = 'Cannot delete Cliente because Agenda exists.'
-      GOTO error
-    END
-
-    /* ERwin Builtin Trigger */
-    /* Cliente  Agenda on parent delete no action */
-    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="Cliente"
-    CHILD_OWNER="", CHILD_TABLE="Agenda"
-    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
-    FK_CONSTRAINT="R_129", FK_COLUMNS="Cd_Cliente" */
     IF EXISTS (
       SELECT * FROM deleted,Agenda
       WHERE
@@ -1444,33 +1242,10 @@ BEGIN
   SELECT @numrows = @@rowcount
   /* ERwin Builtin Trigger */
   /* Cliente  Agenda on parent update no action */
-  /* ERWIN_RELATION:CHECKSUM="0006512b", PARENT_OWNER="", PARENT_TABLE="Cliente"
+  /* ERWIN_RELATION:CHECKSUM="00058047", PARENT_OWNER="", PARENT_TABLE="Cliente"
     CHILD_OWNER="", CHILD_TABLE="Agenda"
     P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
     FK_CONSTRAINT="R_131", FK_COLUMNS="Cd_Cliente" */
-  IF
-    /* %ParentPK(" OR",UPDATE) */
-    UPDATE(Cd_Cliente)
-  BEGIN
-    IF EXISTS (
-      SELECT * FROM deleted,Agenda
-      WHERE
-        /*  %JoinFKPK(Agenda,deleted," = "," AND") */
-        Agenda.Cd_Cliente = deleted.Cd_Cliente
-    )
-    BEGIN
-      SELECT @errno  = 30005,
-             @errmsg = 'Cannot update Cliente because Agenda exists.'
-      GOTO error
-    END
-  END
-
-  /* ERwin Builtin Trigger */
-  /* Cliente  Agenda on parent update no action */
-  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="Cliente"
-    CHILD_OWNER="", CHILD_TABLE="Agenda"
-    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
-    FK_CONSTRAINT="R_129", FK_COLUMNS="Cd_Cliente" */
   IF
     /* %ParentPK(" OR",UPDATE) */
     UPDATE(Cd_Cliente)
@@ -3310,28 +3085,10 @@ BEGIN
            @errmsg  varchar(255)
     /* ERwin Builtin Trigger */
     /* Telefone  Agenda on parent delete no action */
-    /* ERWIN_RELATION:CHECKSUM="0001fe3e", PARENT_OWNER="", PARENT_TABLE="Telefone"
+    /* ERWIN_RELATION:CHECKSUM="00010dc1", PARENT_OWNER="", PARENT_TABLE="Telefone"
     CHILD_OWNER="", CHILD_TABLE="Agenda"
     P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
     FK_CONSTRAINT="R_130", FK_COLUMNS="Cd_Telefone" */
-    IF EXISTS (
-      SELECT * FROM deleted,Agenda
-      WHERE
-        /*  %JoinFKPK(Agenda,deleted," = "," AND") */
-        Agenda.Cd_Telefone = deleted.Cd_Telefone
-    )
-    BEGIN
-      SELECT @errno  = 30001,
-             @errmsg = 'Cannot delete Telefone because Agenda exists.'
-      GOTO error
-    END
-
-    /* ERwin Builtin Trigger */
-    /* Telefone  Agenda on parent delete no action */
-    /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="Telefone"
-    CHILD_OWNER="", CHILD_TABLE="Agenda"
-    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
-    FK_CONSTRAINT="R_128", FK_COLUMNS="Cd_Telefone" */
     IF EXISTS (
       SELECT * FROM deleted,Agenda
       WHERE
@@ -3373,33 +3130,10 @@ BEGIN
   SELECT @numrows = @@rowcount
   /* ERwin Builtin Trigger */
   /* Telefone  Agenda on parent update no action */
-  /* ERWIN_RELATION:CHECKSUM="00021c70", PARENT_OWNER="", PARENT_TABLE="Telefone"
+  /* ERWIN_RELATION:CHECKSUM="00011abe", PARENT_OWNER="", PARENT_TABLE="Telefone"
     CHILD_OWNER="", CHILD_TABLE="Agenda"
     P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
     FK_CONSTRAINT="R_130", FK_COLUMNS="Cd_Telefone" */
-  IF
-    /* %ParentPK(" OR",UPDATE) */
-    UPDATE(Cd_Telefone)
-  BEGIN
-    IF EXISTS (
-      SELECT * FROM deleted,Agenda
-      WHERE
-        /*  %JoinFKPK(Agenda,deleted," = "," AND") */
-        Agenda.Cd_Telefone = deleted.Cd_Telefone
-    )
-    BEGIN
-      SELECT @errno  = 30005,
-             @errmsg = 'Cannot update Telefone because Agenda exists.'
-      GOTO error
-    END
-  END
-
-  /* ERwin Builtin Trigger */
-  /* Telefone  Agenda on parent update no action */
-  /* ERWIN_RELATION:CHECKSUM="00000000", PARENT_OWNER="", PARENT_TABLE="Telefone"
-    CHILD_OWNER="", CHILD_TABLE="Agenda"
-    P2C_VERB_PHRASE="", C2P_VERB_PHRASE="", 
-    FK_CONSTRAINT="R_128", FK_COLUMNS="Cd_Telefone" */
   IF
     /* %ParentPK(" OR",UPDATE) */
     UPDATE(Cd_Telefone)
@@ -4103,5 +3837,3 @@ error:
 END
 
 go
-
-
